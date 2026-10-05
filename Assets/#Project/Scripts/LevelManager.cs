@@ -2,6 +2,7 @@
 #pragma warning disable IDE0044
 
 using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 
 public class LevelManager : MonoBehaviour
@@ -11,12 +12,18 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private Vector2 offSet = Vector2.one * 0.2f;
     [SerializeField] private CardBehavior prefab;
     [SerializeField] private Sprite[] spritesFaceUp;
+    [SerializeField] private float timeBeforeFaceDown;
 
+    public MouseManager MouseManager { get; private set; }
     private List<CardBehavior> cardBehaviors = new();
 
     private int cardFocusedId = -1;
+    private int firstCardFaceUpId = -1;
+    private int secondCardFaceUpId = -1;
 
     private CardBehavior CardFocused => cardFocusedId >= 0 ? cardBehaviors[cardFocusedId] : null;
+    private CardBehavior FirstCardFaceUp => firstCardFaceUpId >= 0 ? cardBehaviors[firstCardFaceUpId] : null;
+    private CardBehavior SecondCardFaceUp => secondCardFaceUpId >= 0 ? cardBehaviors[secondCardFaceUpId] : null;
 
     private void Start()
     {
@@ -82,7 +89,7 @@ public class LevelManager : MonoBehaviour
             }
 
         }
-        else if (cardBehavior.Id != cardFocusedId)
+        else if (cardBehavior.Id != cardFocusedId && cardBehavior.Id != firstCardFaceUpId)
         {
             if (CardFocused != null)
             {
@@ -93,11 +100,48 @@ public class LevelManager : MonoBehaviour
         }
     }
 
+    public void ConnectMouseManager(MouseManager mouseManager)
+    {
+        MouseManager = mouseManager;
+    }
     public void MouseClick()
     {
         if (CardFocused != null)
         {
             CardFocused.TurnFaceUp();
+
+            if (FirstCardFaceUp == null)
+            {
+                firstCardFaceUpId = cardFocusedId;
+
+            }
+            else
+            {
+                secondCardFaceUpId = cardFocusedId;
+                StartCoroutine(CheckResult());
+            }
+
+            CardFocused.UnFocus();
+            cardFocusedId = -1;
         }
+    }
+
+    private IEnumerator CheckResult()
+    {
+        MouseManager.enabled = false;
+
+        yield return new WaitForSeconds(timeBeforeFaceDown);
+
+        if (FirstCardFaceUp.FaceId != SecondCardFaceUp.FaceId)
+        {
+            FirstCardFaceUp.TurnFaceDown();
+            SecondCardFaceUp.TurnFaceDown();
+        }
+
+        firstCardFaceUpId = -1;
+        secondCardFaceUpId = -1;
+
+        MouseManager.enabled = true;
+
     }
 }

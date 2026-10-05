@@ -26,6 +26,7 @@ public class MouseManager : MonoBehaviour
             {
                 Debug.LogError("MouseManager need a LevelManager.");
             }
+            levelManager.ConnectMouseManager(this);
         }
 
     }
