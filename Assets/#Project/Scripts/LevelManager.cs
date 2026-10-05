@@ -1,7 +1,6 @@
 //disable warning about readonly field
 #pragma warning disable IDE0044
 
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,6 +10,7 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private int cardsByLine = 4;
     [SerializeField] private Vector2 offSet = Vector2.one * 0.2f;
     [SerializeField] private CardBehavior prefab;
+    [SerializeField] private Sprite[] spritesFaceUp;
 
     private List<CardBehavior> cardBehaviors = new();
 
@@ -31,6 +31,14 @@ public class LevelManager : MonoBehaviour
 
     private void InstantiateCards()
     {
+        List<int> facesPoolIndex = new();
+
+        for (int index = 0; index < cardNumber / 2; index++)
+        {
+            facesPoolIndex.Add(index);
+            facesPoolIndex.Add(index);
+        }
+
         BoxCollider2D collider = prefab.GetComponentInChildren<BoxCollider2D>();
         float width = collider.size.x;
         float height = collider.size.y;
@@ -49,6 +57,11 @@ public class LevelManager : MonoBehaviour
                 Vector2 position = origin + y * (height + offSet.y) * Vector2.up;
                 position += x * (width + offSet.x) * Vector2.right;
                 CardBehavior cardBehavior = Instantiate(prefab, position, Quaternion.identity);
+
+                int rndIndex = Random.Range(0, facesPoolIndex.Count);
+                int faceIndex = facesPoolIndex[rndIndex];
+                cardBehavior.SetFace(spritesFaceUp[faceIndex], faceIndex);
+                facesPoolIndex.RemoveAt(rndIndex);
 
                 cardBehavior.ConnectToManager(this, cardBehaviors.Count);
 
@@ -77,6 +90,14 @@ public class LevelManager : MonoBehaviour
             }
             cardFocusedId = cardBehavior.Id;
             cardBehavior.Focus();
+        }
+    }
+
+    public void MouseClick()
+    {
+        if (CardFocused != null)
+        {
+            CardFocused.TurnFaceUp();
         }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -5,13 +6,19 @@ public class MouseManager : MonoBehaviour
 {
     private const string ACTION_MAP = "Game";
     private const string ACTION_MOUSE_POSITION = "Mouse Position";
+    private const string ACTION_MOUSE_CLICK = "Click";
     [SerializeField] private InputActionAsset inputActions;
     InputAction mousePosition;
+    InputAction mouseClick;
     [SerializeField] private LevelManager levelManager;
 
     private void Awake()
     {
         mousePosition = inputActions.FindActionMap(ACTION_MAP).FindAction(ACTION_MOUSE_POSITION);
+        mouseClick = inputActions.FindActionMap(ACTION_MAP).FindAction(ACTION_MOUSE_CLICK);
+
+        mouseClick.performed += ctx => { OnClick(ctx); };
+
         if (levelManager == null)
         {
             levelManager = FindAnyObjectByType<LevelManager>();
@@ -36,6 +43,11 @@ public class MouseManager : MonoBehaviour
     private void Update()
     {
         CheckMouseOver();
+    }
+
+    private void OnClick(InputAction.CallbackContext ctx)
+    {
+        levelManager.MouseClick();
     }
 
     private void CheckMouseOver()

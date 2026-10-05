@@ -19,6 +19,8 @@ public class CardBehavior : MonoBehaviour
 
     private LevelManager manager = null;
     public int Id { get; private set; }
+    public int FaceId { get; private set; }
+
 
 
 #pragma warning restore CS0108
@@ -82,6 +84,12 @@ public class CardBehavior : MonoBehaviour
     {
         this.manager = manager;
         Id = id;
+    }
+
+    public void SetFace(Sprite faceUp, int faceId)
+    {
+        spriteFaceUp = faceUp;
+        FaceId = faceId;
     }
 
 }
