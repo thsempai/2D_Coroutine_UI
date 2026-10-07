@@ -14,22 +14,27 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private CardBehavior prefab;
     [SerializeField] private Sprite[] spritesFaceUp;
     [SerializeField] private float timeBeforeFaceDown;
+    [SerializeField] private float timeBeforeVictoryDisplay = 1f;
     [SerializeField] private GameObject[] gameObjectsActivateOnVictory;
 
     public MouseManager MouseManager { get; private set; }
+
     private List<CardBehavior> cardBehaviors = new();
 
-
     private List<int> faceIdAlreadyFaceUp = new();
+
     private int Pairs => faceIdAlreadyFaceUp.Count;
 
     private int cardFocusedId = -1;
+
     private int firstCardFaceUpId = -1;
+
     private int secondCardFaceUpId = -1;
-    private float timeBeforeVictoryDisplay = 1f;
 
     private CardBehavior CardFocused => cardFocusedId >= 0 ? cardBehaviors[cardFocusedId] : null;
+
     private CardBehavior FirstCardFaceUp => firstCardFaceUpId >= 0 ? cardBehaviors[firstCardFaceUpId] : null;
+
     private CardBehavior SecondCardFaceUp => secondCardFaceUpId >= 0 ? cardBehaviors[secondCardFaceUpId] : null;
 
     private void Start()
@@ -38,6 +43,11 @@ public class LevelManager : MonoBehaviour
         {
             cardNumber++;
             Debug.LogWarning($"Card Number need to be an even number then it's became {cardNumber}.");
+        }
+
+        foreach (GameObject go in gameObjectsActivateOnVictory)
+        {
+            go.SetActive(false);
         }
     }
 
@@ -87,6 +97,36 @@ public class LevelManager : MonoBehaviour
         }
     }
 
+    public void ResetGame()
+    {
+        List<int> facesPoolIndex = new();
+
+        for (int n = 0; n < cardNumber / 2; n++)
+        {
+            int index = Random.Range(0, spritesFaceUp.Length);
+            while (facesPoolIndex.Contains(index))
+                index = Random.Range(0, spritesFaceUp.Length);
+
+            facesPoolIndex.Add(index);
+            facesPoolIndex.Add(index);
+        }
+
+        foreach (CardBehavior cardBehavior in cardBehaviors)
+        {
+            int rndIndex = Random.Range(0, facesPoolIndex.Count);
+            int faceIndex = facesPoolIndex[rndIndex];
+            cardBehavior.SetFace(spritesFaceUp[faceIndex], faceIndex);
+            facesPoolIndex.RemoveAt(rndIndex);
+        }
+
+        foreach (GameObject go in gameObjectsActivateOnVictory)
+        {
+            go.SetActive(false);
+        }
+
+        faceIdAlreadyFaceUp.Clear();
+    }
+
     public void MouseOnCard(CardBehavior cardBehavior)
     {
         if (cardBehavior == null)
@@ -116,6 +156,7 @@ public class LevelManager : MonoBehaviour
     {
         MouseManager = mouseManager;
     }
+
     public void MouseClick()
     {
         if (CardFocused != null)
@@ -141,6 +182,10 @@ public class LevelManager : MonoBehaviour
     private IEnumerator VictoryDisplay()
     {
         yield return new WaitForSeconds(timeBeforeVictoryDisplay);
+        foreach (CardBehavior cardBehavior in cardBehaviors)
+        {
+            cardBehavior.TurnFaceDown();
+        }
 
         foreach (GameObject go in gameObjectsActivateOnVictory)
         {
