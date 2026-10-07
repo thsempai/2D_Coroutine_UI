@@ -8,7 +8,7 @@ using UnityEngine;
 
 public class LevelManager : MonoBehaviour
 {
-    [SerializeField][Range(2, 24)] private int cardNumber = 6;
+    [SerializeField][Range(2, 24)] private int cardsNumber = 6;
     [SerializeField] private int cardsByLine = 4;
     [SerializeField] private Vector2 offSet = Vector2.one * 0.2f;
     [SerializeField] private CardBehavior prefab;
@@ -39,10 +39,10 @@ public class LevelManager : MonoBehaviour
 
     private void Start()
     {
-        if (cardNumber % 2 != 0)
+        if (cardsNumber % 2 != 0)
         {
-            cardNumber++;
-            Debug.LogWarning($"Card Number need to be an even number then it's became {cardNumber}.");
+            cardsNumber++;
+            Debug.LogWarning($"Card Number need to be an even number then it's became {cardsNumber}.");
         }
 
         foreach (GameObject go in gameObjectsActivateOnVictory)
@@ -51,11 +51,22 @@ public class LevelManager : MonoBehaviour
         }
     }
 
+
+    public void SetCardsNumber(int n)
+    {
+        cardsNumber = n;
+
+        if (cardsNumber % 2 != 0)
+        {
+            cardsNumber++;
+            Debug.LogWarning($"Card Number need to be an even number then it's became {cardsNumber}.");
+        }
+    }
     public void InstantiateCards()
     {
         List<int> facesPoolIndex = new();
 
-        for (int n = 0; n < cardNumber / 2; n++)
+        for (int n = 0; n < cardsNumber / 2; n++)
         {
             int index = Random.Range(0, spritesFaceUp.Length);
             while (facesPoolIndex.Contains(index))
@@ -69,8 +80,8 @@ public class LevelManager : MonoBehaviour
         float width = collider.size.x;
         float height = collider.size.y;
 
-        int lines = cardNumber / cardsByLine;
-        if (cardNumber % cardsByLine != 0) lines++;
+        int lines = cardsNumber / cardsByLine;
+        if (cardsNumber % cardsByLine != 0) lines++;
 
         float px = (cardsByLine * (width + offSet.x) - offSet.x) / -2f;
         float py = (lines * (height + offSet.y) - offSet.y) / -2f;
@@ -92,7 +103,7 @@ public class LevelManager : MonoBehaviour
                 cardBehavior.ConnectToManager(this, cardBehaviors.Count);
 
                 cardBehaviors.Add(cardBehavior);
-                if (cardBehaviors.Count >= cardNumber) return;
+                if (cardBehaviors.Count >= cardsNumber) return;
             }
         }
     }
@@ -101,7 +112,7 @@ public class LevelManager : MonoBehaviour
     {
         List<int> facesPoolIndex = new();
 
-        for (int n = 0; n < cardNumber / 2; n++)
+        for (int n = 0; n < cardsNumber / 2; n++)
         {
             int index = Random.Range(0, spritesFaceUp.Length);
             while (facesPoolIndex.Contains(index))
@@ -208,7 +219,7 @@ public class LevelManager : MonoBehaviour
         {
             faceIdAlreadyFaceUp.Add(FirstCardFaceUp.FaceId);
             Debug.Log($"Nombre de paires retournées : {Pairs}");
-            if (Pairs >= cardNumber / 2)
+            if (Pairs >= cardsNumber / 2)
             {
                 StartCoroutine(VictoryDisplay());
             }
